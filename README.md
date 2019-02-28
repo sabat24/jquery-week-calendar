@@ -2,6 +2,9 @@
 
 Week calendar relies on jQuery 2.2.0 and jQuery-ui 1.11.2
 
+# Documentation
+[Wiki](https://github.com/sabat24/jquery-week-calendar/wiki)
+
 # New Features!
 
 28.02.2019
