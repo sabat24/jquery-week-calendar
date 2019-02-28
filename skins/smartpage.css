@@ -1,0 +1,101 @@
+/* colors */
+.wc-container {
+    border-left: 5px solid #BBCCFF;
+}
+
+.wc-toolbar {
+    background: #BBCCFF;
+    border: none;
+}
+
+.wc-header {
+    background: #E3E9FF;
+    border: none;
+}
+
+.wc-header {
+    border-bottom: 2px solid #BBCCFF;
+}
+
+h1.wc-title {
+    font-size: 1.6em;
+    font-weight: normal;
+}
+
+.wc-hour-end, .wc-hour-header {
+    color: #666666;
+    border-color: #ccc
+}
+
+.wc-hour-header,
+.wc-grid-timeslot-header,
+.wc-business-hours {
+    background: #F6F9FC;
+    font-size: inherit;
+}
+
+.wc-column-odd {
+    background: transparent;
+}
+
+.wc-column-even {
+    background: #ddddbe;
+}
+
+.wc-time-slots .wc-today {
+    background-color: #ffffcc;
+}
+
+.wc-scrollable-grid .wc-day-column-last,
+.wc-scrollable-grid .wc-day-column-middle,
+.wc-scrollable-grid .wc-day-column-first {
+    border-color: #ddd;
+}
+
+/*calendar*/
+.wc-day-column-first,
+.wc-day-column-last,
+.wc-day-column-middle,
+.wc-time-slot {
+    border-color: #ccc;
+}
+
+.wc-header .wc-day-column-header.wc-today {
+    background-color: #FAD163;
+    border-color: #FAD163;
+}
+
+.wc-header .wc-today.wc-user-header {
+    font-weight: normal;
+}
+
+.wc-today.wc-day-column-last {
+    border-right: 3px double #FAD163;
+}
+
+.wc-today.wc-day-column-first {
+    border-left: 3px double #FAD163;
+}
+
+.wc-time-header-cell {
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wc-nav .wc-today {
+    margin: 0 10px;
+}
+
+@media (max-width: 767px) {
+    .wc-header .wc-day-column-header {
+        padding: 0;
+        font-size: 80%;
+    }
+    .wc-cal-event {
+        font-size: 80%!important;
+    }
+}
+
+
