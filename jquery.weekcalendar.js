@@ -610,7 +610,7 @@
                             if (options.businessHours.limitDisplay === true) {
                                 calendarHeight = (options.businessHours.end - options.businessHours.start) * options.timeslotHeight * options.timeslotsPerHour + headerHeight + navHeight;
                             } else {
-                                calendarHeight = 24 * timeslotHeight + headerHeight + navHeight;
+                                calendarHeight = 24 * timeslotHeight * options.timeslotsPerHour + headerHeight + navHeight;
                             }
                         } else {
                             calendarHeight = options.height(this.element);
