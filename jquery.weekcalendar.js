@@ -280,7 +280,17 @@
                      */
                     resizeEvent: 'resize.weekcalendar',
 
+                    responsiveRespondTo: 'window',
+                    responsive: null,
+                    mobileFirst: false,
                 },
+
+                activeBreakpoint: null,
+                breakpoints: [],
+                breakpointSettings: [],
+                originalSettings: {},
+                windowWidth: 0,
+                windowTimer: null,
 
                 /***********************
                  * Initialise calendar *
@@ -288,10 +298,13 @@
                 _create: function () {
                     var self = this;
                     self._computeOptions();
+                    self.originalSettings = $.extend({}, self.options);
+                    self._registerBreakpoints();
                     self._setupEventDelegation();
                     self._renderCalendar();
                     self._loadCalEvents();
                     self._resizeCalendar();
+                    self._checkResponsive(true);
                     self._scrollToHour(self.options.date.getHours(), true);
 
                     if (this.options.resizeEvent) {
@@ -558,7 +571,6 @@
                     }
                 },
 
-
                 // compute dynamic options based on other config values
                 _computeOptions: function () {
                     var options = this.options;
@@ -571,6 +583,17 @@
                         options.millisToDisplay = MILLIS_IN_DAY;
                         options.millisPerTimeslot = MILLIS_IN_DAY / options.timeslotsPerDay;
                     }
+                },
+
+                _reinit: function (newOptions) {
+                    var self = this;
+                    var currentEvents = self.element.find('.wc-cal-event').map(function () {
+                        return $(this).data('calEvent');
+                    });
+                    self._renderEvents({
+                        events: currentEvents,
+                        options: newOptions
+                    }, self.element.find('.wc-day-column-inner'));
                 },
 
                 /*
@@ -603,6 +626,108 @@
                         }
                         this._trigger('resize', this.element);
                     }
+                },
+
+                _registerBreakpoints: function () {
+
+                    var self = this, breakpoint, currentBreakpoint, l,
+                        responsiveSettings = self.options.responsive || null;
+
+                    if ($.type(responsiveSettings) === 'array' && responsiveSettings.length) {
+
+                        for (breakpoint in responsiveSettings) {
+
+                            l = self.breakpoints.length - 1;
+
+                            if (responsiveSettings.hasOwnProperty(breakpoint)) {
+                                currentBreakpoint = responsiveSettings[breakpoint].breakpoint;
+
+                                // loop through the breakpoints and cut out any existing
+                                // ones with the same breakpoint number, we don't want dupes.
+                                while (l >= 0) {
+                                    if (self.breakpoints[l] && self.breakpoints[l] === currentBreakpoint) {
+                                        self.breakpoints.splice(l, 1);
+                                    }
+                                    l--;
+                                }
+
+                                self.breakpoints.push(currentBreakpoint);
+                                self.breakpointSettings[currentBreakpoint] = responsiveSettings[breakpoint].settings;
+
+                            }
+
+                        }
+
+                        self.breakpoints.sort(function (a, b) {
+                            return (self.options.mobileFirst) ? a - b : b - a;
+                        });
+
+                    }
+
+                },
+
+                _checkResponsive: function (initial, forceUpdate) {
+                    var self = this,
+                        breakpoint, targetBreakpoint, respondToWidth, triggerBreakpoint = false;
+                    var windowWidth = window.innerWidth || $(window).width();
+
+                    if (self.options.responsiveRespondTo === 'window') {
+                        respondToWidth = windowWidth;
+                    } else if (self.options.responsiveRespondTo === 'calendar') {
+                        // TODO implement
+                    } else if (self.options.responsiveRespondTo === 'min') {
+                        // TODO implement
+                        //respondToWidth = Math.min(windowWidth, calendarWidht);
+                    }
+
+                    if (self.options.responsive &&
+                        self.options.responsive.length &&
+                        self.options.responsive !== null) {
+
+                        targetBreakpoint = null;
+
+                        for (breakpoint in self.breakpoints) {
+                            if (self.breakpoints.hasOwnProperty(breakpoint)) {
+                                if (self.options.mobileFirst === false) {
+                                    if (respondToWidth < self.breakpoints[breakpoint]) {
+                                        targetBreakpoint = self.breakpoints[breakpoint];
+                                    }
+                                } else {
+                                    if (respondToWidth > self.breakpoints[breakpoint]) {
+                                        targetBreakpoint = self.breakpoints[breakpoint];
+                                    }
+                                }
+                            }
+                        }
+
+                        if (targetBreakpoint !== null) {
+
+                            if (self.activeBreakpoint !== null) {
+                                if (targetBreakpoint !== self.activeBreakpoint || forceUpdate) {
+                                    self.activeBreakpoint =
+                                        targetBreakpoint;
+                                    self._reinit(self.breakpointSettings[targetBreakpoint]);
+                                    triggerBreakpoint = targetBreakpoint;
+                                }
+                            } else {
+                                self.activeBreakpoint = targetBreakpoint;
+                                self._reinit(self.breakpointSettings[targetBreakpoint]);
+                                triggerBreakpoint = targetBreakpoint;
+                            }
+                        } else {
+                            if (self.activeBreakpoint !== null) {
+                                self.activeBreakpoint = null;
+                                self._reinit(self.originalSettings);
+                                triggerBreakpoint = targetBreakpoint;
+                            }
+                        }
+
+                        // only trigger breakpoints during an actual break. not on initialize.
+                        if (!initial && triggerBreakpoint !== false) {
+                            self._trigger('breakpoint', [self, triggerBreakpoint]);
+                        }
+                    }
+
                 },
 
                 _findScrollBarWidth: function () {
@@ -893,8 +1018,7 @@
                      Find a way to handle it
                      */
                     $calendarContainer.find('.wc-time-header-cell').css({
-                        height: (options.timeslotHeight * options.timeslotsPerHour) - 11,
-                        padding: 5
+                        height: (options.timeslotHeight * options.timeslotsPerHour) - 1,
                     });
                     //add the user data to every impacted column
                     if (showAsSeparatedUser) {
